@@ -59,7 +59,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-${{ github.event.inputs.run_id }}
+          name: playwright-report-${{ github.event.inputs.run_id || github.run_number }}
           path: |
             playwright-report/
             test-results/
