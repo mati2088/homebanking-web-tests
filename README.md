@@ -1,5 +1,7 @@
 # Homebanking Automation - Playwright Tests
 
+[![Playwright Tests](https://github.com/mati2088/homebanking-web-tests/actions/workflows/playwright.yml/badge.svg)](https://github.com/mati2088/homebanking-web-tests/actions/workflows/playwright.yml)
+
 Proyecto de automatización de pruebas para la aplicación de homebanking demo usando Playwright y el patrón Page Object Model.
 
 ## 🚀 Características
