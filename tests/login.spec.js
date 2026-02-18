@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const LoginPage = require('../pages/LoginPage');
 const HomePage = require('../pages/HomePage');
+const credentials = require('../testData/credentials');
 
 test.describe('Login Tests @login @test-web', () => {
     let loginPage;
@@ -14,8 +15,7 @@ test.describe('Login Tests @login @test-web', () => {
 
     test('Successful login with valid credentials @smoke @regression', async ({ page }) => {
         // Arrange
-        const username = 'usuario_demo';
-        const password = 'password123';
+        const { username, password } = credentials.validUser;
 
         // Act
         await loginPage.login(username, password);

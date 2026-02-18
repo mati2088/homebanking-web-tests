@@ -1,15 +1,17 @@
 name: Run Homebanking Tests
 
 on:
+  push:
+    branches: [ main ]
   workflow_dispatch:
     inputs:
       test_key:
         description: 'Test case key (ej: PROJ-TC-001)'
-        required: true
+        required: false
         type: string
       run_id:
         description: 'Automation run ID from Gestor Pruebas'
-        required: true
+        required: false
         type: string
       tags:
         description: 'Tags to filter (@smoke, @regression, @login, @test-web)'

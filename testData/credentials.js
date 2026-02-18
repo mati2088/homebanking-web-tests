@@ -1,7 +1,7 @@
 module.exports = {
     validUser: {
-        username: 'usuario_demo',
-        password: 'password123'
+        username: 'demo',
+        password: 'demo123'
     },
     invalidUsers: [
         {

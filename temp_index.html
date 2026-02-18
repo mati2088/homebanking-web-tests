@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Home Banking - Gestiona tus cuentas, transferencias y plazos fijos de forma segura">
+    <title>Home Banking - Tu Banco Digital</title>
+    <link rel="stylesheet" href="styles.css?v=Chase">
+    <link rel="stylesheet" href="js/card-styles.css?v=Chase">
+    <!-- jsPDF for valid PDF receipts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        .btn-doc {
+            background-color: #e53e3e !important;
+            /* Bright Red */
+            color: white !important;
+            border: 1px solid #c53030 !important;
+            transition: all 0.3s ease !important;
+            box-shadow: var(--shadow-sm);
+            font-weight: 700 !important;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-doc:hover {
+            transform: translateY(-2px) !important;
+            background-color: #c53030 !important;
+            /* Darker Red */
+            color: white !important;
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Documentation Panel Styles */
+        .docs-floating-panel {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* Desktop: Float to the right */
+        @media (min-width: 769px) {
+            .docs-floating-panel {
+                position: absolute;
+                right: 2rem;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 220px;
+                z-index: 100;
+            }
+        }
+
+        /* Mobile: Show at top, centered */
+        @media (max-width: 768px) {
+            .docs-floating-panel {
+                position: relative;
+                margin: 1rem auto 2rem;
+                width: 90%;
+                max-width: 320px;
+            }
+
+            .login-container {
+                padding: 1rem !important;
+            }
+
+            .login-card {
+                padding: 1.5rem !important;
+                margin: 0 !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <!-- Login View -->
+    <div id="login-view" class="view active">
+        <!-- Documentation Panel (shows first on mobile, floats right on desktop) -->
+        <div class="docs-floating-panel">
+            <div
+                style="text-align: center; border-bottom: 2px solid #f0f0f0; padding-bottom: 0.8rem; margin-bottom: 0.5rem;">
+                <span style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem;">📂</span>
+                <h3 style="margin: 0; font-size: 1rem; color: #4a5568; font-weight: 600;">Documentación</h3>
+            </div>
+            <a href="https://docs.google.com/document/d/1mw2tHUOUtaQeuTKEvuixQkx5sPYfQTgVr5d5Hxb17q8/edit?tab=t.0"
+                target="_blank" class="btn btn-doc"
+                style="text-decoration: none; text-align: center; font-size: 0.9rem; justify-content: center;">Plan de
+                Pruebas</a>
+            <a href="https://docs.google.com/document/d/1KcJmUn0KpLSNQxVGpXlYsOVFYvabJrrsrYG_KFsHDq4/edit?tab=t.0"
+                target="_blank" class="btn btn-doc"
+                style="text-decoration: none; text-align: center; font-size: 0.9rem; justify-content: center;">Doc.
+                Funcional</a>
+        </div>
+
+        <div class="login-container">
+            <div class="login-card">
+                <div class="logo">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--primary)"
+                        stroke-width="2.5" stroke-linecap="square">
+                        <path d="M3 21h18"></path>
+                        <path d="M3 7v1h18V7H3z"></path>
+                        <path d="M5 21V8"></path>
+                        <path d="M9 21V8"></path>
+                        <path d="M13 21V8"></path>
+                        <path d="M19 21V8"></path>
+                        <path d="M3 7l9-5 9 5"></path>
+                    </svg>
+                </div>
+                <h1>HOME BANKING</h1>
+                <p class="subtitle">Personal Banking Excellence</p>
+
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="username">Usuario</label>
+                        <input type="text" id="username" name="username" required autocomplete="username">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Contraseña</label>
+                        <input type="password" id="password" name="password" required autocomplete="current-password">
+                    </div>
+
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="remember-me">
+                            <span>Recordarme</span>
+                        </label>
+                    </div>
+
+                    <div id="login-error" class="error-message"></div>
+
+                    <button type="submit" class="btn btn-primary" id="login-btn">
+                        <span class="btn-text">Ingresar</span>
+                        <span class="btn-loader"></span>
+                    </button>
+                </form>
+
+                <div class="demo-credentials">
+                    <p class="demo-title">Credenciales de prueba:</p>
+                    <div class="demo-list">
+                        <div class="demo-item">
+                            <strong>Usuario válido:</strong> demo / demo123
+                        </div>
+                        <div class="demo-item">
+                            <strong>Error credenciales:</strong> wrong / wrong
+                        </div>
+                        <div class="demo-item">
+                            <strong>Cuenta bloqueada:</strong> locked / locked
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App View -->
+    <div id="app-view" class="view">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-brand">
+                <svg width="40" height="40" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="60" height="60" rx="12" fill="url(#gradient2)" />
+                    <path d="M30 15L45 25V45H35V35H25V45H15V25L30 15Z" fill="white" />
+                    <defs>
+                        <linearGradient id="gradient2" x1="0" y1="0" x2="60" y2="60">
+                            <stop offset="0%" stop-color="#3b82f6" />
+                            <stop offset="100%" stop-color="#06b6d4" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <span class="nav-title">Home Banking</span>
+            </div>
+            <div class="nav-user">
+                <span id="user-name">Usuario</span>
+                <button id="logout-btn" class="btn btn-secondary btn-sm">Salir</button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <ul class="menu">
+                    <li class="menu-item active" data-view="dashboard">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                        <span>Inicio</span>
+                    </li>
+                    <li class="menu-item" data-view="transfer">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <polyline points="19 12 12 19 5 12"></polyline>
+                        </svg>
+                        <span>Transferencias</span>
+                    </li>
+                    <li class="menu-item" data-view="fixed-deposit">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="12" y1="1" x2="12" y2="23"></line>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                        <span>Plazos Fijos</span>
+                    </li>
+                    <li class="menu-item" data-view="loans">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                        <span>Préstamos</span>
+                    </li>
+                    <li class="menu-item" data-view="services">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+                        </svg>
+                        <span>Pago de Servicios</span>
+                    </li>
+                    <li class="menu-item" data-view="cards" id="menu-item-virtual-card">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                            <line x1="1" y1="10" x2="23" y2="10"></line>
+                        </svg>
+                        <span>Tarjeta Virtual</span>
+                    </li>
+                    <li class="menu-item" data-view="client-data">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        <span>Mis Datos</span>
+                    </li>
+                </ul>
+            </aside>
+
+            <!-- Content Area -->
+            <main class="content">
+                <!-- Dashboard Section -->
+                <section id="dashboard-section" class="content-section active">
+                    <div class="section-header">
+                        <h2>Panel Principal</h2>
+                        <p class="section-subtitle">Resumen de tus cuentas</p>
+                    </div>
+
+                    <div class="accounts-grid">
+                        <div class="account-card">
+                            <div class="account-header">
+                                <span class="account-type">Cuenta Corriente</span>
+                                <button class="toggle-balance" data-account="checking">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="account-number">**** **** **** 1234</div>
+                            <div class="account-balance" data-balance="checking">
+                                <span class="balance-label">Saldo disponible</span>
+                                <span class="balance-amount">$ <span class="balance-value">0.00</span></span>
+                            </div>
+                        </div>
+
+                        <div class="account-card">
+                            <div class="account-header">
+                                <span class="account-type">Caja de Ahorro</span>
+                                <button class="toggle-balance" data-account="savings">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="account-number">**** **** **** 5678</div>
+                            <div class="account-balance" data-balance="savings">
+                                <span class="balance-label">Saldo disponible</span>
+                                <span class="balance-amount">$ <span class="balance-value">0.00</span></span>
+                            </div>
+                        </div>
+
+                        <div class="account-card">
+                            <div class="account-header">
+                                <span class="account-type">Tarjeta de Crédito</span>
+                                <button class="toggle-balance" data-account="credit">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="account-number">**** **** **** 9012</div>
+                            <div class="account-balance" data-balance="credit">
+                                <span class="balance-label">Disponible</span>
+                                <span class="balance-amount">$ <span class="balance-value">0.00</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="transactions-section">
+                        <h3>Últimos Movimientos</h3>
+                        <div class="transactions-list" id="recent-transactions">
+                            <!-- Transactions will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Transfer Section -->
+                <section id="transfer-section" class="content-section">
+                    <div class="section-header">
+                        <h2>Transferencias</h2>
+                        <p class="section-subtitle">Envía dinero de forma segura</p>
+                    </div>
+
+                    <div class="transfer-container">
+                        <form id="transfer-form">
+                            <div class="form-group">
+                                <label for="transfer-type">Tipo de transferencia</label>
+                                <select id="transfer-type" name="transfer-type" required>
+                                    <option value="own">Entre mis cuentas</option>
+                                    <option value="third-party">A terceros</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="source-account">Cuenta origen</label>
+                                <select id="source-account" name="source-account" required>
+                                    <!-- Options populated by JavaScript -->
+                                </select>
+                            </div>
+
+                            <div class="form-group" id="destination-own-group">
+                                <label for="destination-own-account">Cuenta destino</label>
+                                <select id="destination-own-account" name="destination-own-account">
+                                    <!-- Options populated by JavaScript -->
+                                </select>
+                            </div>
+
+                            <div class="form-group hidden" id="destination-third-party-group">
+                                <label for="destination-account-number">CBU/Alias destino</label>
+                                <input type="text" id="destination-account-number" name="destination-account-number"
+                                    placeholder="Ingresa CBU o Alias">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="transfer-amount">Monto</label>
+                                <div class="input-with-prefix">
+                                    <span class="input-prefix">$</span>
+                                    <input type="number" id="transfer-amount" name="transfer-amount" step="0.01"
+                                        min="0.01" placeholder="0.00" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="transfer-description">Descripción (opcional)</label>
+                                <input type="text" id="transfer-description" name="transfer-description"
+                                    placeholder="Ej: Pago de servicios" maxlength="100">
+                            </div>
+
+                            <div id="transfer-error" class="error-message"></div>
+
+                            <button type="submit" class="btn btn-primary">
+                                <span class="btn-text">Transferir</span>
+                                <span class="btn-loader"></span>
+                            </button>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- Fixed Deposit Section -->
+                <section id="fixed-deposit-section" class="content-section">
+                    <div class="section-header">
+                        <h2>Plazos Fijos</h2>
+                        <p class="section-subtitle">Invierte y genera intereses</p>
+                    </div>
+
+                    <div class="fixed-deposit-container">
+                        <div class="active-deposits">
+                            <h3>Plazos Fijos Activos</h3>
+                            <div id="active-deposits-list">
+                                <!-- Active deposits populated by JavaScript -->
+                            </div>
+                        </div>
+
+                        <div class="new-deposit">
+                            <h3>Crear Nuevo Plazo Fijo</h3>
+                            <form id="fixed-deposit-form">
+                                <div class="form-group">
+                                    <label for="deposit-source-account">Cuenta origen</label>
+                                    <select id="deposit-source-account" name="deposit-source-account" required>
+                                        <!-- Options populated by JavaScript -->
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="deposit-amount">Monto a invertir</label>
+                                    <div class="input-with-prefix">
+                                        <span class="input-prefix">$</span>
+                                        <input type="number" id="deposit-amount" name="deposit-amount" step="0.01"
+                                            min="1000" placeholder="Mínimo $1,000" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="deposit-term">Plazo</label>
+                                    <select id="deposit-term" name="deposit-term" required>
+                                        <option value="30">30 días - 35% TNA</option>
+                                        <option value="60">60 días - 38% TNA</option>
+                                        <option value="90">90 días - 42% TNA</option>
+                                        <option value="180">180 días - 45% TNA</option>
+                                        <option value="360">360 días - 50% TNA</option>
+                                    </select>
+                                </div>
+
+                                <div class="deposit-summary">
+                                    <div class="summary-row">
+                                        <span>Interés estimado:</span>
+                                        <span class="summary-value" id="estimated-interest">$ 0.00</span>
+                                    </div>
+                                    <div class="summary-row">
+                                        <span>Total al vencimiento:</span>
+                                        <span class="summary-value highlight" id="total-maturity">$ 0.00</span>
+                                    </div>
+                                    <div class="summary-row">
+                                        <span>Fecha de vencimiento:</span>
+                                        <span class="summary-value" id="maturity-date">-</span>
+                                    </div>
+                                </div>
+
+                                <div id="deposit-error" class="error-message"></div>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <span class="btn-text">Crear Plazo Fijo</span>
+                                    <span class="btn-loader"></span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Loans Section -->
+                <section id="loans-section" class="content-section">
+                    <div class="section-header">
+                        <h2>Préstamos</h2>
+                        <p class="section-subtitle">Solicita financiación al instante</p>
+                    </div>
+
+                    <div class="fixed-deposit-container">
+                        <div class="active-deposits">
+                            <h3>Mis Préstamos Activos</h3>
+                            <div id="active-loans-list">
+                                <!-- Active loans populated by JavaScript -->
+                            </div>
+                        </div>
+
+                        <div class="new-deposit">
+                            <h3>Solicitar Nuevo Préstamo</h3>
+                            <form id="loan-form">
+                                <div class="form-group">
+                                    <label for="loan-destination-account">Cuenta destino</label>
+                                    <select id="loan-destination-account" name="loan-destination-account" required>
+                                        <!-- Options populated by JavaScript -->
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="loan-amount">Monto a solicitar</label>
+                                    <div class="input-with-prefix">
+                                        <span class="input-prefix">$</span>
+                                        <input type="number" id="loan-amount" name="loan-amount" step="0.01" min="1000"
+                                            max="500000" placeholder="Mínimo $1,000" required>
+                                    </div>
+                                    <small
+                                        style="color: var(--text-tertiary); display: block; margin-top: 0.25rem;">Monto
+                                        máximo: $500,000</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="loan-installments">Cuotas</label>
+                                    <select id="loan-installments" name="loan-installments" required>
+                                        <option value="6">6 cuotas</option>
+                                        <option value="12">12 cuotas</option>
+                                        <option value="18">18 cuotas</option>
+                                        <option value="24">24 cuotas</option>
+                                    </select>
+                                </div>
+
+                                <div id="loan-error" class="error-message"></div>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <span class="btn-text">Solicitar Préstamo</span>
+                                    <span class="btn-loader"></span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Payment Services Section -->
+                <section id="services-section" class="content-section">
+                    <div class="section-header">
+                        <h2>Pago de Servicios</h2>
+                        <p class="section-subtitle">Paga tus servicios de forma rápida y segura</p>
+                    </div>
+
+                    <div class="services-container">
+                        <div class="service-payment-card">
+                            <form id="service-payment-form">
+                                <div class="form-group">
+                                    <label for="service-select">Selecciona el Servicio</label>
+                                    <select id="service-select" required>
+                                        <option value="">-- Selecciona un servicio --</option>
+                                        <!-- Services populated by JavaScript -->
+                                    </select>
+                                </div>
+
+                                <div id="service-details" style="display: none;">
+                                    <div class="service-info-display">
+                                        <div class="service-info-icon" id="service-icon-display"></div>
+                                        <div>
+                                            <h3 id="service-name-display"></h3>
+                                            <p id="service-company-display"></p>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="service-amount">Monto a Pagar</label>
+                                        <input type="number" id="service-amount" step="0.01" min="0.01" required>
+                                        <p class="hint-text" id="suggested-amount-text"></p>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="service-account">Cuenta a Debitar</label>
+                                        <select id="service-account" required>
+                                            <!-- Accounts populated by JavaScript -->
+                                        </select>
+                                    </div>
+
+                                    <div id="service-error" class="error-message"></div>
+
+                                    <button type="submit" class="btn btn-primary">
+                                        <span class="btn-text">Pagar Servicio</span>
+                                        <span class="btn-loader"></span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Virtual Cards Section -->
+                <section id="cards-section" class="content-section">
+                    <div class="section-header">
+                        <h2>Tarjetas Virtuales</h2>
+                        <p class="section-subtitle">Genera tarjetas de débito virtuales para compras online</p>
+                    </div>
+
+                    <div class="cards-container">
+                        <div class="card-control-panel">
+                            <div class="control-main">
+                                <div class="form-group-inline">
+                                    <label for="card-account-select">Sincronizar con cuenta:</label>
+                                    <select id="card-account-select" class="form-control">
+                                        <!-- Populated by JS -->
+                                    </select>
+                                </div>
+                                <button id="generate-card-btn" class="btn btn-primary">
+                                    <span class="btn-text">+ Generar Nueva Tarjeta</span>
+                                    <span class="btn-loader"></span>
+                                </button>
+                            </div>
+                            <p class="hint-text">Límite: 1 tarjeta virtual activa por cuenta (Caja de Ahorro / Cta Cte)
+                            </p>
+                        </div>
+
+                        <div id="virtual-cards-list" class="virtual-cards-grid">
+                            <!-- Virtual cards populated by JavaScript -->
+                        </div>
+                    </div>
+                </section>
+
+
+                <!-- Client Data Section -->
+                <section id="client-data-section" class="content-section">
+                    <div class="section-header">
+                        <h2>Mis Datos</h2>
+                        <p class="section-subtitle">Información personal y cuentas</p>
+                    </div>
+
+                    <div class="client-data-container">
+                        <div class="data-card">
+                            <h3>Información Personal</h3>
+                            <div class="data-grid">
+                                <div class="data-item">
+                                    <span class="data-label">Nombre completo</span>
+                                    <span class="data-value" id="client-name">-</span>
+                                </div>
+                                <div class="data-item">
+                                    <span class="data-label">DNI</span>
+                                    <span class="data-value" id="client-dni">-</span>
+                                </div>
+                                <div class="data-item">
+                                    <span class="data-label">Email</span>
+                                    <span class="data-value" id="client-email">-</span>
+                                </div>
+                                <div class="data-item">
+                                    <span class="data-label">Teléfono</span>
+                                    <span class="data-value" id="client-phone">-</span>
+                                </div>
+                                <div class="data-item">
+                                    <span class="data-label">Dirección</span>
+                                    <span class="data-value" id="client-address">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="data-card">
+                            <h3>Mis Cuentas</h3>
+                            <div id="client-accounts-list">
+                                <!-- Accounts populated by JavaScript -->
+                            </div>
+                        </div>
+
+                        <div class="data-card">
+                            <h3>Tarjetas</h3>
+                            <div id="client-cards-list">
+                                <!-- Cards populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal for confirmations -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Confirmación</h3>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Modal content populated by JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modal-cancel">Cancelar</button>
+                <button class="btn btn-primary" id="modal-confirm">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/mockData.js?v=master_flush_22"></script>
+    <script src="js/mockServices.js?v=master_flush_22"></script>
+    <script src="js/utils.js?v=master_flush_22"></script>
+    <script src="js/app.js?v=master_flush_22"></script>
+</body>
+
+</html>

@@ -33,7 +33,7 @@ class LoginPage extends BasePage {
 
     async isLoginSuccessful() {
         try {
-            await this.waitForURL('**/#/inicio', { timeout: 5000 });
+            await this.waitForSelector('#user-name', { timeout: 10000 });
             return true;
         } catch (error) {
             return false;
