@@ -34,7 +34,8 @@ jobs:
           cache: 'npm'
       
       - name: Install dependencies
-        run: npm ci
+        # CAMBIO 1: npm install es más seguro si falta package-lock.json
+        run: npm install
       
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
@@ -50,7 +51,9 @@ jobs:
             TAGS="@smoke"
           fi
           echo "Running with tags: $TAGS"
-          playwright test --project=chromium --grep "$TAGS"
+          
+          # CAMBIO 2 (CRÍTICO): Agregar npx
+          npx playwright test --project=chromium --grep "$TAGS"
       
       - name: Upload test results
         if: always()
