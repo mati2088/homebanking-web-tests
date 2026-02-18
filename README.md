@@ -38,6 +38,8 @@ npx playwright install
 
 ## ▶️ Ejecutar Tests
 
+### Ejecución General
+
 ```bash
 # Ejecutar todos los tests
 npm test
@@ -57,15 +59,85 @@ npm run test:debug
 npm run report
 ```
 
+### 🏷️ Ejecución por Tags (CI/CD Ready)
+
+El proyecto soporta ejecución selectiva de tests mediante tags. Ideal para pipelines de CI/CD.
+
+#### Tags Disponibles
+
+| Tag | Descripción | Uso |
+|-----|-------------|-----|
+| `@smoke` | Tests críticos de humo | Ejecución rápida pre-deploy |
+| `@regression` | Suite completa de regresión | Ejecución completa post-deploy |
+| `@login` | Tests de autenticación | Tests específicos de login |
+| `@test-web` | Tests de aplicación web | Filtrar tests web vs mobile |
+
+#### Comandos por Tag
+
+```bash
+# Ejecutar solo tests de smoke (críticos)
+npm run test:smoke
+
+# Ejecutar suite completa de regresión
+npm run test:regression
+
+# Ejecutar solo tests de login
+npm run test:login
+
+# Ejecutar solo tests web
+npm run test:web
+```
+
+#### Uso Avanzado con --grep
+
+```bash
+# Ejecutar tests con múltiples tags (OR)
+npx playwright test --grep "@smoke|@login"
+
+# Excluir tests con ciertos tags
+npx playwright test --grep-invert "@smoke"
+
+# Combinar tags (tests que tengan ambos)
+npx playwright test --grep "(?=.*@smoke)(?=.*@login)"
+```
+
+#### Integración CI/CD
+
+**GitHub Actions ejemplo:**
+```yaml
+- name: Run Smoke Tests
+  run: npm run test:smoke
+
+- name: Run Regression Tests
+  run: npm run test:regression
+```
+
+**Jenkins ejemplo:**
+```groovy
+stage('Smoke Tests') {
+  steps {
+    sh 'npm run test:smoke'
+  }
+}
+```
+
+
 ## 📝 Tests Implementados
 
 ### Login Tests (`tests/login.spec.js`)
 
-1. ✅ Login exitoso con credenciales válidas
-2. ✅ Login fallido con credenciales inválidas
-3. ✅ Login fallido con usuario vacío
-4. ✅ Login fallido con contraseña vacía
-5. ✅ Login fallido con credenciales vacías
+Todos los tests incluyen tags para ejecución selectiva:
+
+| Test | Tags | Descripción |
+|------|------|-------------|
+| Login exitoso con credenciales válidas | `@smoke @regression @login @test-web` | Test crítico de login exitoso |
+| Login fallido con credenciales inválidas | `@smoke @regression @login @test-web` | Validación de credenciales incorrectas |
+| Login fallido con usuario vacío | `@regression @login @test-web` | Validación de campo usuario requerido |
+| Login fallido con contraseña vacía | `@regression @login @test-web` | Validación de campo password requerido |
+| Login fallido con credenciales vacías | `@regression @login @test-web` | Validación de formulario vacío |
+
+**Total**: 5 tests × 3 navegadores = 15 ejecuciones por suite completa
+
 
 ## 🎯 Page Object Model
 

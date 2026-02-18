@@ -2,7 +2,7 @@ const { test, expect } = require('@playwright/test');
 const LoginPage = require('../pages/LoginPage');
 const HomePage = require('../pages/HomePage');
 
-test.describe('Login Tests', () => {
+test.describe('Login Tests @login @test-web', () => {
     let loginPage;
     let homePage;
 
@@ -12,7 +12,7 @@ test.describe('Login Tests', () => {
         await loginPage.navigateToLogin();
     });
 
-    test('Successful login with valid credentials', async ({ page }) => {
+    test('Successful login with valid credentials @smoke @regression', async ({ page }) => {
         // Arrange
         const username = 'usuario_demo';
         const password = 'password123';
@@ -28,7 +28,7 @@ test.describe('Login Tests', () => {
         expect(isHomePageDisplayed).toBeTruthy();
     });
 
-    test('Failed login with invalid credentials', async ({ page }) => {
+    test('Failed login with invalid credentials @smoke @regression', async ({ page }) => {
         // Arrange
         const username = 'invalid_user';
         const password = 'wrong_password';
@@ -41,7 +41,7 @@ test.describe('Login Tests', () => {
         expect(errorMessage).not.toBeNull();
     });
 
-    test('Failed login with empty username', async ({ page }) => {
+    test('Failed login with empty username @regression', async ({ page }) => {
         // Arrange
         const username = '';
         const password = 'password123';
@@ -54,7 +54,7 @@ test.describe('Login Tests', () => {
         expect(isLoginSuccessful).toBeFalsy();
     });
 
-    test('Failed login with empty password', async ({ page }) => {
+    test('Failed login with empty password @regression', async ({ page }) => {
         // Arrange
         const username = 'usuario_demo';
         const password = '';
@@ -67,7 +67,7 @@ test.describe('Login Tests', () => {
         expect(isLoginSuccessful).toBeFalsy();
     });
 
-    test('Failed login with empty credentials', async ({ page }) => {
+    test('Failed login with empty credentials @regression', async ({ page }) => {
         // Arrange
         const username = '';
         const password = '';
@@ -80,3 +80,4 @@ test.describe('Login Tests', () => {
         expect(isLoginSuccessful).toBeFalsy();
     });
 });
+

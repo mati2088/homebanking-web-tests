@@ -1,0 +1,173 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: 'Test suite to run'
+        required: true
+        default: 'smoke'
+        type: choice
+        options:
+          - smoke
+          - regression
+          - login
+          - all
+
+jobs:
+  # Job para tests de smoke (rápidos, críticos)
+  smoke-tests:
+    if: github.event.inputs.test_suite == 'smoke' || github.event.inputs.test_suite == '' || github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    name: Smoke Tests
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      
+      - name: Run smoke tests
+        run: npm run test:smoke
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-test-results
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  # Job para tests de regresión completa
+  regression-tests:
+    if: github.event.inputs.test_suite == 'regression' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    name: Regression Tests
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+      
+      - name: Run regression tests
+        run: npm run test:regression -- --project=${{ matrix.browser }}
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-test-results-${{ matrix.browser }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 30
+
+  # Job para tests específicos de login
+  login-tests:
+    if: github.event.inputs.test_suite == 'login'
+    runs-on: ubuntu-latest
+    name: Login Tests
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+      
+      - name: Run login tests
+        run: npm run test:login
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: login-test-results
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  # Job para todos los tests
+  all-tests:
+    if: github.event.inputs.test_suite == 'all'
+    runs-on: ubuntu-latest
+    name: All Tests
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+      
+      - name: Run all tests
+        run: npm test
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-test-results
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 30
+      
+      - name: Upload HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
