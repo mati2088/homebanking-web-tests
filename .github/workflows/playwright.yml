@@ -45,7 +45,7 @@ jobs:
           echo "📋 Tags: ${{ github.event.inputs.tags }}"
           echo "🆔 Run ID: ${{ github.event.inputs.run_id }}"
           
-          playwright test --grep "${{ github.event.inputs.tags }}"
+          playwright test --project=chromium --grep "${{ github.event.inputs.tags }}"
       
       - name: Upload test results
         if: always()
