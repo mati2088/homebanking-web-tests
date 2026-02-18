@@ -13,7 +13,7 @@ test.describe('Login Tests @login @test-web', () => {
         await loginPage.navigateToLogin();
     });
 
-    test('Successful login with valid credentials @smoke @regression', async ({ page }) => {
+    test('Successful login with valid credentials @smoke @regression @loginExitoso', async ({ page }) => {
         // Arrange
         const { username, password } = credentials.validUser;
 
